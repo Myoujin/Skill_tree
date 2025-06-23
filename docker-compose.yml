@@ -10,3 +10,16 @@ services:
       DATABASE_URL: "file:/app/data/db.sqlite"
       JWT_SECRET: "change_me"
     restart: unless-stopped
+
+  vite:
+    image: node:20-slim
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    command: sh -c "npm install && npm run dev -- --host"
+    environment:
+      NODE_ENV: development
+    depends_on:
+      - skilltree
