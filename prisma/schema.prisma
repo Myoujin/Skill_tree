@@ -1,0 +1,49 @@
+// Prisma schema for Viadrina Data Science Skill Tree
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  email      String     @unique
+  password   String
+  userSkills UserSkill[]
+}
+
+model Skill {
+  id          String       @id
+  title       String
+  description String
+  image       String
+  prereqIds   String[]
+  userSkills  UserSkill[]
+}
+
+model Role {
+  id               String   @id
+  title            String
+  description      String
+  requiredSkillIds String[]
+}
+
+model Course {
+  id          String   @id
+  title       String
+  description String
+  skillIds    String[]
+}
+
+model UserSkill {
+  user   User  @relation(fields: [userId], references: [id])
+  userId Int
+  skill  Skill @relation(fields: [skillId], references: [id])
+  skillId String
+
+  @@id([userId, skillId])
+}
