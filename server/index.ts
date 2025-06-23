@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-const JWT_SECRET = 'secret';
+const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 function createToken(userId: number) {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
