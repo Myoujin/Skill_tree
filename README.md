@@ -21,3 +21,17 @@ docker compose up --build
 ```
 
 The API will be available on port `4000` and data will persist in the `./data` folder.
+
+### Runtime requirements
+
+The server relies on OpenSSL at runtime and expects the `@prisma/client` package
+to be present. The provided `Dockerfile` installs dependencies, builds the
+project and generates the Prisma client with:
+
+```Dockerfile
+RUN npm run build && npm run build-server && npx prisma generate
+```
+
+If you run the application outside Docker, ensure OpenSSL is installed on your
+system (e.g. `apt-get install openssl`) and run the above command so that the
+`@prisma/client` runtime is generated and available.
