@@ -28,7 +28,8 @@ You can build and run the project using Docker:
 docker compose up --build
 ```
 
-The API will be available on port `4000` and data will persist in the `./data` folder.
+The API will be available on port `4000` and the Vite dev server on port `3000`.
+Persisted SQLite data will be stored in the `./data` folder.
 
 ### Runtime requirements
 
