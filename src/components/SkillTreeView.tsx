@@ -57,6 +57,8 @@ const buildGraph = (
         id: s.id,
         data: { label: <div title={s.description}>{s.title}</div> },
         position: { x: lvl * 250, y: idx * 120 },
+        sourcePosition: 'right',
+        targetPosition: 'left',
         style: {
           border: highlighted.includes(s.id)
             ? '2px solid orange'

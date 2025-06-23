@@ -36,7 +36,7 @@ function App() {
   return (
     <div className="h-screen flex flex-col">
       <div className="flex flex-1 overflow-hidden">
-        <div className="w-1/4 border-r overflow-y-auto">
+        <div className="w-1/4 border-r overflow-y-auto bg-[#003a7c]">
           <CourseSidebar
             courses={data.courses}
             skills={data.skills}
