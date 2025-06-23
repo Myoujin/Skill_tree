@@ -26,6 +26,8 @@ model Skill {
   unlocks       SkillRelation[] @relation("UnlocksFromSkill")
 
   userSkills    UserSkill[]
+  roleSkills    RoleSkill[]
+  courseSkills  CourseSkill[]
 }
 
 model SkillRelation {
@@ -39,17 +41,19 @@ model SkillRelation {
 }
 
 model Role {
-  id               String   @id
-  title            String
-  description      String
-  requiredSkillIds String[]
+  id          String   @id
+  title       String
+  description String
+
+  roleSkills RoleSkill[]
 }
 
 model Course {
   id          String   @id
   title       String
   description String
-  skillIds    String[]
+
+  courseSkills CourseSkill[]
 }
 
 model UserSkill {
@@ -59,4 +63,24 @@ model UserSkill {
   skillId String
 
   @@id([userId, skillId])
+}
+
+model RoleSkill {
+  roleId  String
+  skillId String
+
+  role  Role  @relation(fields: [roleId], references: [id])
+  skill Skill @relation(fields: [skillId], references: [id])
+
+  @@id([roleId, skillId])
+}
+
+model CourseSkill {
+  courseId String
+  skillId  String
+
+  course Course @relation(fields: [courseId], references: [id])
+  skill  Skill  @relation(fields: [skillId], references: [id])
+
+  @@id([courseId, skillId])
 }
