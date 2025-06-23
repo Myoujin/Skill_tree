@@ -12,6 +12,14 @@ npm run server # starts API on :4000
 npm run dev    # starts Vite dev server on :3000
 ```
 
+To reach the frontend from other machines (e.g. when running on a VPS),
+start the dev server with the `--host` flag or set `server.host` in
+`vite.config.ts` so Vite listens on all interfaces:
+
+```bash
+npm run dev -- --host
+```
+
 ## Docker
 
 You can build and run the project using Docker:

@@ -9,6 +9,9 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3000
+    port: 3000,
+    // Listen on all network interfaces so the dev server is reachable
+    // from other machines (e.g. when running on a VPS)
+    host: true
   }
 });
