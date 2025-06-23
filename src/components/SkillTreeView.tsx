@@ -14,7 +14,7 @@ interface Props {
   skills: Skill[];
   completed: string[];
   highlighted: string[];
-  onComplete: (id: string) => Promise<void>;
+  onToggle: (id: string, completed: boolean) => Promise<void>;
 }
 
 /** Compute hierarchical levels for skills */
@@ -55,7 +55,7 @@ const buildGraph = (
     levelSkills.forEach((s, idx) => {
       nodes.push({
         id: s.id,
-        data: { label: s.title },
+        data: { label: <div title={s.description}>{s.title}</div> },
         position: { x: lvl * 250, y: idx * 120 },
         style: {
           border: highlighted.includes(s.id)
@@ -76,11 +76,20 @@ const buildGraph = (
   return { nodes, edges };
 };
 
-const SkillTreeView = ({ skills, completed, highlighted, onComplete }: Props) => {
+const SkillTreeView = ({ skills, completed, highlighted, onToggle }: Props) => {
   const { nodes, edges } = useMemo(
     () => buildGraph(skills, completed, highlighted),
     [skills, completed, highlighted]
   );
+
+  const handleClick = (_: any, node: Node) => {
+    const skill = skills.find((s) => s.id === node.id)!;
+    const isCompleted = completed.includes(skill.id);
+    const prereqsMet = skill.prereqIds.every((p) => completed.includes(p));
+
+    if (!isCompleted && !prereqsMet) return;
+    onToggle(skill.id, isCompleted);
+  };
 
   return (
     <div style={{ width: '100%', height: '600px' }}>
@@ -90,7 +99,7 @@ const SkillTreeView = ({ skills, completed, highlighted, onComplete }: Props) =>
         nodesDraggable={false}
         panOnDrag={false}
         zoomOnScroll={false}
-        onNodeClick={(_, node) => onComplete(node.id)}
+        onNodeClick={handleClick}
         fitView
       >
         <Background />
