@@ -13,6 +13,9 @@ async function main() {
     { id: 't-tests', title: 't-Tests', description: 'Perform hypothesis testing', image: '', prereqIds: ['stat-dist'] },
     { id: 'conf-int', title: 'Confidence Intervals', description: 'Estimate ranges', image: '', prereqIds: ['stat-dist'] },
     { id: 'regression', title: 'Regression', description: 'Fit linear models', image: '', prereqIds: ['t-tests','conf-int'] },
+    { id: 'logistic-regression', title: 'Logistic Regression', description: 'Model binary outcomes', image: '', prereqIds: ['regression'] },
+    { id: 'sparse-regression', title: 'Sparse Regression', description: 'Use regularisation for feature selection', image: '', prereqIds: ['regression'] },
+    { id: 'poly-regression', title: 'Polynomial Regression', description: 'Model nonlinear trends', image: '', prereqIds: ['regression'] },
   ];
 
   for (const s of skills) {
@@ -52,6 +55,17 @@ async function main() {
       description: 'Covers hypothesis testing and regression',
       courseSkills: {
         create: ['stat-dist', 't-tests', 'conf-int', 'regression'].map((skillId) => ({ skill: { connect: { id: skillId } } })),
+      },
+    },
+  });
+
+  await prisma.course.create({
+    data: {
+      id: 'ml',
+      title: 'Machine Learning',
+      description: 'Covers advanced regression techniques',
+      courseSkills: {
+        create: ['logistic-regression', 'sparse-regression', 'poly-regression'].map((skillId) => ({ skill: { connect: { id: skillId } } })),
       },
     },
   });

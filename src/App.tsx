@@ -14,6 +14,7 @@ const fetchTree = async () => {
 
 function App() {
   const [loggedIn, setLoggedIn] = useState<boolean>(!!localStorage.getItem('token'));
+  const [highlighted, setHighlighted] = useState<string[]>([]);
   const { data, error, refetch } = useQuery(['tree', loggedIn], fetchTree, { enabled: loggedIn });
 
   if (!loggedIn) {
@@ -36,12 +37,17 @@ function App() {
     <div className="h-screen flex flex-col">
       <div className="flex flex-1 overflow-hidden">
         <div className="w-1/4 border-r overflow-y-auto">
-          <CourseSidebar courses={data.courses} skills={data.skills} />
+          <CourseSidebar
+            courses={data.courses}
+            skills={data.skills}
+            onHover={(ids) => setHighlighted(ids)}
+          />
         </div>
         <div className="w-3/4 overflow-y-auto flex justify-center p-4">
           <SkillTreeView
             skills={data.skills}
             completed={data.completedSkillIds}
+            highlighted={highlighted}
             onComplete={async (id) => {
               await axios.post(`/api/skill/${id}/complete`);
               refetch();
