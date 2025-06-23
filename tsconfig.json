@@ -2,8 +2,9 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "dist-server",
-    "module": "commonjs",
-    "target": "es2019",
+    "module": "es2022",
+    "target": "es2022",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true
   },
