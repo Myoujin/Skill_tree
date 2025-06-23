@@ -54,7 +54,7 @@ app.get('/api/me', auth, async (req, res) => {
 app.get('/api/tree', auth, async (req, res) => {
   const userId = (req as any).userId;
   const [skillsRaw, rolesRaw, coursesRaw, userSkills] = await Promise.all([
-    prisma.skill.findMany({ include: { prerequisites: true } }),
+    prisma.skill.findMany({ include: { unlocks: true } }),
     prisma.role.findMany({ include: { roleSkills: true } }),
     prisma.course.findMany({ include: { courseSkills: true } }),
     prisma.userSkill.findMany({ where: { userId } }),
@@ -65,7 +65,7 @@ app.get('/api/tree', auth, async (req, res) => {
     title: s.title,
     description: s.description,
     image: s.image,
-    prereqIds: s.prerequisites.map((p) => p.fromId),
+    prereqIds: s.unlocks.map((p) => p.fromId),
   }));
 
   const roles = rolesRaw.map((r) => ({
