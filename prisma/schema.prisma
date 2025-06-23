@@ -1,4 +1,4 @@
-// Prisma schema for Viadrina Data Science Skill Tree
+// Prisma schema for Data Science Skill Tree
 
 datasource db {
   provider = "sqlite"
@@ -17,12 +17,25 @@ model User {
 }
 
 model Skill {
-  id          String       @id
+  id          String  @id
   title       String
   description String
   image       String
-  prereqIds   String[]
-  userSkills  UserSkill[]
+
+  prerequisites SkillRelation[] @relation("PrereqOnSkill")
+  unlocks       SkillRelation[] @relation("UnlocksFromSkill")
+
+  userSkills    UserSkill[]
+}
+
+model SkillRelation {
+  fromId String
+  toId   String
+
+  from   Skill @relation("PrereqOnSkill",  fields: [fromId], references: [id])
+  to     Skill @relation("UnlocksFromSkill", fields: [toId],  references: [id])
+
+  @@id([fromId, toId])
 }
 
 model Role {
