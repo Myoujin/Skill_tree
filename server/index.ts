@@ -53,13 +53,41 @@ app.get('/api/me', auth, async (req, res) => {
 
 app.get('/api/tree', auth, async (req, res) => {
   const userId = (req as any).userId;
-  const [skills, roles, courses, userSkills] = await Promise.all([
-    prisma.skill.findMany(),
-    prisma.role.findMany(),
-    prisma.course.findMany(),
+  const [skillsRaw, rolesRaw, coursesRaw, userSkills] = await Promise.all([
+    prisma.skill.findMany({ include: { prerequisites: true } }),
+    prisma.role.findMany({ include: { roleSkills: true } }),
+    prisma.course.findMany({ include: { courseSkills: true } }),
     prisma.userSkill.findMany({ where: { userId } }),
   ]);
-  res.json({ skills, roles, courses, completedSkillIds: userSkills.map((u) => u.skillId) });
+
+  const skills = skillsRaw.map((s) => ({
+    id: s.id,
+    title: s.title,
+    description: s.description,
+    image: s.image,
+    prereqIds: s.prerequisites.map((p) => p.fromId),
+  }));
+
+  const roles = rolesRaw.map((r) => ({
+    id: r.id,
+    title: r.title,
+    description: r.description,
+    requiredSkillIds: r.roleSkills.map((rs) => rs.skillId),
+  }));
+
+  const courses = coursesRaw.map((c) => ({
+    id: c.id,
+    title: c.title,
+    description: c.description,
+    skillIds: c.courseSkills.map((cs) => cs.skillId),
+  }));
+
+  res.json({
+    skills,
+    roles,
+    courses,
+    completedSkillIds: userSkills.map((u) => u.skillId),
+  });
 });
 
 app.post('/api/skill/:id/complete', auth, async (req, res) => {
