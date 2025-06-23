@@ -101,4 +101,17 @@ app.post('/api/skill/:id/complete', auth, async (req, res) => {
   res.json({ ok: true });
 });
 
+app.delete('/api/skill/:id/complete', auth, async (req, res) => {
+  const userId = (req as any).userId;
+  const skillId = req.params.id;
+  try {
+    await prisma.userSkill.delete({
+      where: { userId_skillId: { userId, skillId } },
+    });
+  } catch (e) {
+    // ignore if record doesn't exist
+  }
+  res.json({ ok: true });
+});
+
 app.listen(4000, () => console.log('Server started on http://localhost:4000'));

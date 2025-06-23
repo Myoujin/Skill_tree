@@ -48,8 +48,12 @@ function App() {
             skills={data.skills}
             completed={data.completedSkillIds}
             highlighted={highlighted}
-            onComplete={async (id) => {
-              await axios.post(`/api/skill/${id}/complete`);
+            onToggle={async (id, isCompleted) => {
+              if (isCompleted) {
+                await axios.delete(`/api/skill/${id}/complete`);
+              } else {
+                await axios.post(`/api/skill/${id}/complete`);
+              }
               refetch();
             }}
           />
