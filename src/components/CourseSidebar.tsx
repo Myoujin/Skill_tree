@@ -21,7 +21,7 @@ const CourseSidebar = ({ courses, onHover }: Props) => {
       {courses.map((c) => (
         <li
           key={c.id}
-          className="p-2 border rounded hover:bg-gray-100"
+          className="p-2 border rounded hover:bg-gray-100 bg-[#ffca35]"
           onMouseEnter={() => onHover(c.skillIds)}
           onMouseLeave={() => onHover([])}
         >
