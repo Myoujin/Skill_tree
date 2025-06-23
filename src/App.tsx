@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import axios from './api/axios';
 import SkillTreeView from './components/SkillTreeView';
 import CourseSidebar from './components/CourseSidebar';
 import RoleBar from './components/RoleBar';
+import LoginForm from './components/LoginForm';
 
 /** Fetch tree data from backend */
 const fetchTree = async () => {
@@ -11,7 +13,22 @@ const fetchTree = async () => {
 };
 
 function App() {
-  const { data, refetch } = useQuery(['tree'], fetchTree);
+  const [loggedIn, setLoggedIn] = useState<boolean>(!!localStorage.getItem('token'));
+  const { data, error, refetch } = useQuery(['tree', loggedIn], fetchTree, { enabled: loggedIn });
+
+  if (!loggedIn) {
+    return <LoginForm onAuth={() => { setLoggedIn(true); refetch(); }} />;
+  }
+
+  if (error) {
+    // If the token is invalid or expired, show the login form
+    if ((error as any).response?.status === 401) {
+      localStorage.removeItem('token');
+      setLoggedIn(false);
+      return <LoginForm onAuth={() => { setLoggedIn(true); refetch(); }} />;
+    }
+    return <div className="p-4">Error loading data</div>;
+  }
 
   if (!data) return <div className="p-4">Loading...</div>;
 

@@ -12,6 +12,11 @@ export default defineConfig({
     port: 3000,
     // Listen on all network interfaces so the dev server is reachable
     // from other machines (e.g. when running on a VPS)
-    host: true
+    host: true,
+    // Proxy API requests to the backend container when running under
+    // docker-compose so the frontend can reach the API on port 4000
+    proxy: {
+      '/api': 'http://skilltree:4000'
+    }
   }
 });
