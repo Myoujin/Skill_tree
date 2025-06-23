@@ -4,6 +4,7 @@ WORKDIR /app
 
 # install deps
 COPY package*.json prisma ./
+RUN apt-get update -y && apt-get install -y openssl
 RUN npm ci
 
 # copy source and build
@@ -15,6 +16,7 @@ FROM node:20-slim
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app /app
+RUN apt-get update -y && apt-get install -y openssl
 RUN npm prune --production
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
