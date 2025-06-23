@@ -1,4 +1,6 @@
-import { SkillTree, SkillTreeGroup, SkillProvider, SavedDataType, Skill as STSkill } from 'beautiful-skill-tree';
+import React, { useMemo } from 'react';
+import ReactFlow, { Background, Controls, Node, Edge } from 'reactflow';
+import 'reactflow/dist/style.css';
 
 export interface Skill {
   id: string;
@@ -11,60 +13,90 @@ export interface Skill {
 interface Props {
   skills: Skill[];
   completed: string[];
+  highlighted: string[];
   onComplete: (id: string) => Promise<void>;
 }
 
-/** Build hierarchical skill tree data */
-const buildTree = (skills: Skill[]): STSkill[] => {
+/** Compute hierarchical levels for skills */
+const computeLevels = (skills: Skill[]): Map<string, number> => {
   const byId = new Map(skills.map((s) => [s.id, s]));
-  const build = (skill: Skill): STSkill => ({
-    id: skill.id,
-    title: skill.title,
-    tooltip: { content: skill.description },
-    children: skills
-      .filter((s) => s.prereqIds.includes(skill.id))
-      .map(build),
-  });
-  return skills.filter((s) => s.prereqIds.length === 0).map(build);
+  const levels = new Map<string, number>();
+  const calc = (id: string): number => {
+    if (levels.has(id)) return levels.get(id)!;
+    const skill = byId.get(id)!;
+    if (skill.prereqIds.length === 0) {
+      levels.set(id, 0);
+      return 0;
+    }
+    const lvl = Math.max(...skill.prereqIds.map((p) => calc(p))) + 1;
+    levels.set(id, lvl);
+    return lvl;
+  };
+  skills.forEach((s) => calc(s.id));
+  return levels;
 };
 
-/** Determine node states based on completed skills */
-const buildSavedData = (skills: Skill[], completed: string[]): SavedDataType => {
-  const data: SavedDataType = {};
+/** Build React Flow nodes and edges */
+const buildGraph = (
+  skills: Skill[],
+  completed: string[],
+  highlighted: string[]
+): { nodes: Node[]; edges: Edge[] } => {
+  const levels = computeLevels(skills);
+  const levelMap = new Map<number, Skill[]>();
   skills.forEach((s) => {
-    const unlocked = s.prereqIds.every((p) => completed.includes(p));
-    data[s.id] = {
-      optional: false,
-      nodeState: completed.includes(s.id)
-        ? 'selected'
-        : unlocked
-        ? 'unlocked'
-        : 'locked',
-    };
+    const lvl = levels.get(s.id)!;
+    if (!levelMap.has(lvl)) levelMap.set(lvl, []);
+    levelMap.get(lvl)!.push(s);
   });
-  return data;
+  const nodes: Node[] = [];
+  const edges: Edge[] = [];
+  levelMap.forEach((levelSkills, lvl) => {
+    levelSkills.forEach((s, idx) => {
+      nodes.push({
+        id: s.id,
+        data: { label: s.title },
+        position: { x: lvl * 250, y: idx * 120 },
+        style: {
+          border: highlighted.includes(s.id)
+            ? '2px solid orange'
+            : completed.includes(s.id)
+            ? '2px solid green'
+            : '1px solid gray',
+          padding: 8,
+          borderRadius: 4,
+          background: '#fff',
+        },
+      });
+      s.prereqIds.forEach((p) => {
+        edges.push({ id: `${p}-${s.id}`, source: p, target: s.id });
+      });
+    });
+  });
+  return { nodes, edges };
 };
 
-/** Renders the vertical skill tree */
-const SkillTreeView = ({ skills, completed, onComplete }: Props) => {
-  const treeData = buildTree(skills);
-  const saved = buildSavedData(skills, completed);
+const SkillTreeView = ({ skills, completed, highlighted, onComplete }: Props) => {
+  const { nodes, edges } = useMemo(
+    () => buildGraph(skills, completed, highlighted),
+    [skills, completed, highlighted]
+  );
 
   return (
-    <SkillProvider>
-      <SkillTreeGroup>
-        {() => (
-          <SkillTree
-            treeId="ds-tree"
-            title="Skills"
-            orientation="vertical"
-            data={treeData}
-            savedData={saved}
-            handleNodeSelect={(e) => onComplete(e.key)}
-          />
-        )}
-      </SkillTreeGroup>
-    </SkillProvider>
+    <div style={{ width: '100%', height: '600px' }}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodesDraggable={false}
+        panOnDrag={false}
+        zoomOnScroll={false}
+        onNodeClick={(_, node) => onComplete(node.id)}
+        fitView
+      >
+        <Background />
+        <Controls />
+      </ReactFlow>
+    </div>
   );
 };
 
