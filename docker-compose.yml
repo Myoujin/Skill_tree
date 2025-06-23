@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  skilltree:
+    build: .
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      DATABASE_URL: "file:/app/data/db.sqlite"
+      JWT_SECRET: "change_me"
+    restart: unless-stopped
